@@ -6,9 +6,6 @@ from PyQt6.QtCore import QStandardPaths, QFileInfo
 import os
 import sys
 
-os.environ['QT_QPA_PLATFORM'] = 'xcb'
-__appname__ = "MainTestApp"
-
 class Widget(QtWidgets.QWidget):
     def __init__(self, parent=None):
         super(Widget, self).__init__(parent)
@@ -71,6 +68,9 @@ class Widget(QtWidgets.QWidget):
 
 
 def main():
+    #os.environ['QT_QPA_PLATFORM'] = 'xcb'
+    os.environ['QT_DEBUG_PLUGINS'] = '1'
+
     app = QtWidgets.QApplication(sys.argv)
     w = Widget()
     w.show()
