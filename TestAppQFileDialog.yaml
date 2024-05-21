@@ -1,0 +1,37 @@
+app-id: com.rtosta.TestAppQFileDialog
+runtime: org.kde.Platform
+runtime-version: "6.7"
+sdk: org.kde.Sdk
+base: com.riverbankcomputing.PyQt.BaseApp
+base-version: "6.7"
+command: TestAppQFileDialog
+finish-args:
+  - "--share=ipc"
+  - "--socket=wayland"
+  - "--socket=fallback-x11"
+  - "--socket=pulseaudio"
+  - "--share=network"
+  - "--device=all"
+  - "--filesystem=host"
+  - "--filesystem=xdg-download"
+  - "--talk-name=org.freedesktop.Notifications"
+  - "--talk-name=org.kde.StatusNotifierWatcher"
+  - "--env=QTWEBENGINEPROCESS_PATH=/app/bin/QtWebEngineProcess"
+  - "--env=QT_SCALE_FACTOR_ROUNDING_POLICY=RoundPreferFloor"
+
+cleanup:
+  - /include
+  - /lib/pkgconfig
+  - "*.la"
+  - "*.a"
+cleanup-commands:
+  - /app/cleanup-BaseApp.sh
+modules:
+  - name: TestAppQFileDialog
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=${FLATPAK_DEST} .
+    sources:
+      - type: git
+        url: https://github.com/rafatosta/QWebEngine-QFileDialog-Example.git
+        branch: main
