@@ -1,14 +1,23 @@
 from PyQt6 import QtCore, QtWidgets, QtWebEngineWidgets, QtWebEngineCore
-from PyQt6.QtWebEngineCore import QWebEngineDownloadRequest, QWebEngineSettings
+from PyQt6.QtWebEngineCore import QWebEngineDownloadRequest, QWebEngineSettings, QWebEnginePage
 from PyQt6.QtWidgets import QFileDialog
 from PyQt6.QtCore import QStandardPaths, QFileInfo
+
+from PyQt6.QtWebEngineWidgets import QWebEngineView
 
 import os
 import sys
 
-class Widget(QtWidgets.QWidget):
+
+class Browser(QWebEngineView):
+    pass
+
+class WhatsApp(QWebEnginePage):
+    pass
+
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, parent=None):
-        super(Widget, self).__init__(parent)
+        super(MainWindow, self).__init__(parent)
 
        
 
@@ -29,6 +38,7 @@ class Widget(QtWidgets.QWidget):
         #self.url ='https://www.bennish.net/web-notifications.html'
 
         self.url = 'https://demo.borland.com/testsite/download_testpage.php'
+        #self.url = 'https://web.whatsapp.com/'
 
 
         self.page = QtWebEngineCore.QWebEnginePage(self.view)
@@ -37,8 +47,8 @@ class Widget(QtWidgets.QWidget):
 
         self.view.setPage(self.page)
         self.view.load(QtCore.QUrl(self.url))
-        hbox = QtWidgets.QHBoxLayout(self)
-        hbox.addWidget(self.view)
+       
+        self.setCentralWidget(self.view)
 
     def load_finished(self, flag):
         self.page.setFeaturePermission(
@@ -72,7 +82,7 @@ def main():
     os.environ['QT_DEBUG_PLUGINS'] = '1'
 
     app = QtWidgets.QApplication(sys.argv)
-    w = Widget()
+    w = MainWindow()
     w.show()
     sys.exit(app.exec())
 
