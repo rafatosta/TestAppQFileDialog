@@ -1,64 +1,40 @@
-from PyQt6 import QtCore, QtWidgets, QtWebEngineWidgets, QtWebEngineCore
-from PyQt6.QtWebEngineCore import QWebEngineDownloadRequest, QWebEngineSettings, QWebEnginePage
+from PyQt6 import QtWidgets
+from PyQt6.QtWebEngineCore import QWebEngineDownloadRequest, QWebEngineSettings, QWebEnginePage, QWebEngineProfile
 from PyQt6.QtWidgets import QFileDialog
-from PyQt6.QtCore import QStandardPaths, QFileInfo
+from PyQt6.QtCore import QStandardPaths, QFileInfo, QUrl
 
 from PyQt6.QtWebEngineWidgets import QWebEngineView
 
 import os
 import sys
 
+__user_agent__ = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+__whatsapp_url__ = 'https://web.whatsapp.com/'
 
 class Browser(QWebEngineView):
-    pass
+    def __init__(self):
+        QWebEngineView.__init__(self)
+        # definição do pergil do usuário, local que será armazenados os cookies e informações sobre os navegadores
+        self.profile = QWebEngineProfile(self)
+        self.profile.setHttpUserAgent(__user_agent__)
+        self.profile.downloadRequested.connect(self.on_downloadRequested)
 
-class WhatsApp(QWebEnginePage):
-    pass
+        # Ativando tudo o que tiver de direito
+        self.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
+        self.settings().setAttribute(QWebEngineSettings.WebAttribute.AutoLoadImages, True)
+        self.settings().setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True)
+        self.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
+        self.settings().setAttribute(
+            QWebEngineSettings.WebAttribute.FocusOnNavigationEnabled, True)
+        self.settings().setAttribute(
+            QWebEngineSettings.WebAttribute.ScrollAnimatorEnabled, True)
 
-class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, parent=None):
-        super(MainWindow, self).__init__(parent)
-
-       
-
-        self.view = QtWebEngineWidgets.QWebEngineView()
-        self.view.page().profile().downloadRequested.connect(
-            self.on_downloadRequested
-        )
+        # Cria a WebPage personalizada
+        self.whats = WhatsApp(self.profile, self)
+        self.setPage(self.whats)
+        self.load(QUrl(__whatsapp_url__))
 
     
-        # Ativando tudo o que tiver de direito
-        self.view.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptEnabled, True)
-        self.view.settings().setAttribute(QWebEngineSettings.WebAttribute.AutoLoadImages, True)
-        self.view.settings().setAttribute(QWebEngineSettings.WebAttribute.PluginsEnabled, True)
-        self.view.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalStorageEnabled, True)
-
-
-        #self.url = "https://web-push-book.gauntface.com/demos/notification-examples/"
-        #self.url ='https://www.bennish.net/web-notifications.html'
-
-        self.url = 'https://demo.borland.com/testsite/download_testpage.php'
-        #self.url = 'https://web.whatsapp.com/'
-
-
-        self.page = QtWebEngineCore.QWebEnginePage(self.view)
-        self.page.loadFinished.connect(self.load_finished)
-        self.page.featurePermissionRequested.connect(self.permission)
-
-        self.view.setPage(self.page)
-        self.view.load(QtCore.QUrl(self.url))
-       
-        self.setCentralWidget(self.view)
-
-    def load_finished(self, flag):
-        self.page.setFeaturePermission(
-            self.page.url(),  QtWebEngineCore.QWebEnginePage.Feature.Notifications,
-                                       QtWebEngineCore.QWebEnginePage.PermissionPolicy.PermissionGrantedByUser)
-
-    def permission(self, frame, feature):
-            self.page.setFeaturePermission(
-                frame, feature,  QtWebEngineCore.QWebEnginePage.PermissionPolicy.PermissionGrantedByUser)
-   
     def on_downloadRequested(self, download:QWebEngineDownloadRequest):
         directory=QStandardPaths.writableLocation(
                 QStandardPaths.StandardLocation.DownloadLocation)
@@ -73,8 +49,20 @@ class MainWindow(QtWidgets.QMainWindow):
             download.setDownloadDirectory(os.path.dirname(path))
             download.accept()
 
-    def foo(self):
-        print("finished")
+class WhatsApp(QWebEnginePage):
+    def __init__(self, *args, **kwargs):
+        QWebEnginePage.__init__(self, *args, **kwargs)
+
+
+class MainWindow(QtWidgets.QMainWindow):
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
+
+        self.view = Browser()
+       
+        self.setCentralWidget(self.view)
+
+    
 
 
 def main():
